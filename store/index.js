@@ -19,14 +19,30 @@ export default {
   },
   mutations: {
     //CARD
-    SET_CARDS (state, payload) {
-      state.mountains = [...state.mountains, ...payload]
-    },
     SET_PAYLOAD_SORT (state, payload) { // передаем параметр сортировки, чтобы сортировать в actions
       state.sortParams.sort = payload
     },
     SET_PAYLOAD_ID (state, payload) {
       state.sortParams.id = payload
+    },
+    SORT_MOUNTAINS(state, payload) {
+      let sort = state.sortParams.sort
+      let id = state.sortParams.id;
+      if (payload) {
+        state.mountains = payload
+      }
+      let filteredMointains = state.mountains.filter(item => {
+        if (item.category && id) {
+          return item.category === +id;
+        }
+      }).sort((a, b) => {
+        if (sort === 'price' && a.price && b.price) {
+          return b.price - a.price
+        } else if (sort === 'rating') {
+          return a.rating - b.rating
+        }
+      }) // сортировка по цене / популярности
+      state.mountains = [...filteredMointains]
     },
 
     // CATEGORY
@@ -49,6 +65,26 @@ export default {
       }
     },
     BASKET_DISPLAY (state, payload) { // открытие / закрытие модалки.
+      const body =  document.body;
+
+      if (payload) {
+        const widthScroll = window.innerWidth - body.offsetWidth;
+        body.dbScrollY = window.scrollY;
+        body.style.cssText = `
+        transition: 0;
+        position: fixed;
+        top: ${~window.scrollY}px;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        height: 100vh;
+        overflow: hidden;
+        padding-right: ${widthScroll}px;`;
+      } else {
+        const body =  document.body;
+        body.style.cssText ='';
+        window.scroll({top: document.body.dbScrollY});
+      }
       state.basketView = payload;
     },
     BASKET_ITEM_DEL (state, target) { // удаляем товары из корзины
@@ -85,7 +121,7 @@ export default {
       state.userData = [...state.userData, payload]
       state.basketData.length = 0;
     },
-    APPLICCATIN_SENT (state, payload) {
+    APPLICATIN_SENT (state, payload) {
       state.applicationSent = payload
     }
   },
@@ -93,20 +129,7 @@ export default {
     async renderCard ({ commit, state }) {
       const res = await fetch('https://frontend-test.idaproject.com/api/product')
       const mountains = await res.json()
-      let sort = state.sortParams.sort
-      let id = state.sortParams.id;
-      let filteredMointains = await mountains.sort((a, b) => {
-        if (sort === 'price' && a.price && b.price) {
-          return a.price - b.price
-        } else if (sort === 'rating' && a.rating && b.rating) {
-          return a.rating - b.rating
-        }
-      }).filter(item => {
-        if (item.category && id) {
-          return item.category === +id;
-        }
-      }) // сортировка по цене / популярности
-      commit('SET_CARDS', filteredMointains)
+      await commit('SORT_MOUNTAINS', mountains)
     },
     async renderCatalogItem ({ commit, state }) {
       const res = await fetch('https://frontend-test.idaproject.com/api/product-category')

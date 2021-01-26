@@ -1,6 +1,5 @@
 <template>
   <div class="modal-basket-wrapper" v-if="this.$store.state.basketView" @click='basketModal($event)'>
-
     <div class="basket-wrapper" v-if="this.$store.state.basketFormGroup">
       <div class="basket-header">
         <span>Корзина</span>
@@ -46,18 +45,16 @@
             v-model="name"
           >
           <div class="basket-input-form">
-            <span>+7</span>
             <input
               type="tel"
               v-model="phone"
               name="phone"
               id="phone"
-              placeholder="___ ___-__-__"
+              placeholder="Телефон"
               autocomplete="tel"
-              maxlength="14"
+              minlength="15"
               class="form-control"
               v-phone
-              pattern="[0-9]{3} [0-9]{3}-[0-9]{2}-[0-9]{2}"
               required
             />
           </div>
@@ -71,6 +68,7 @@
 
         <input type="submit" value="Отправить" class="basket-input-form basket-input-submit" @click.prevent="onsubmit($event)">
       </form>
+      <span class="error-form" v-if="formError">Заполните форму корректно!</span>
     </div>
 
     <div class="basket-wrapper" v-if="!this.$store.state.basketFormGroup">
@@ -78,25 +76,20 @@
         <span>Корзина</span>
         <img class="basket-header__close" src="@/theme/img/close.svg" @click='basketModal'>
       </div>
-      <div class="basket-filling__items-list">
 
+      <div class="basket-filling__items-list" v-if="!this.$store.state.applicationSent">
         <form>
           <span class="empty-cart">Пока что вы ничего не добавили в корзину.</span>
-          <input type="submit" value="Перейти к выбору" class="basket-input-form basket-input-submit" @click.prevent="basketModal($event)">
+          <input type="submit" value="Перейти к выбору" class="basket-input-form basket-input-submit go-to-selection" @click.prevent="basketModal($event)">
         </form>
-    </div>
-    </div>
-
-    <div class="basket-wrapper" v-if="this.$store.state.applicationSent" style="z-index: 500">
-      <div class="basket-header">
-        <span>Корзина</span>
-        <img class="basket-header__close" src="@/theme/img/close.svg" @click='basketModal'>
       </div>
 
-      <div class="basket-placed-order">
-        <img src="@/theme/img/ok-hand.png" alt="ok">
-        <span>Заявка успешно отправлена</span>
-        <p>Вскоре наш менеджер свяжется с Вами</p>
+      <div v-if="this.$store.state.applicationSent">
+        <div class="basket-placed-order">
+          <img src="@/theme/img/ok-hand.png" alt="ok">
+          <span>Заявка успешно отправлена</span>
+          <p>Вскоре наш менеджер свяжется с Вами</p>
+        </div>
       </div>
     </div>
   </div>
@@ -109,18 +102,20 @@ export default {
       phone: '',
       name: '',
       adres: '',
-      applicationSent: false
+      formError: false
     }
   },
   methods: {
     basketModal (event) {
       const target = event.target;
       if (target.classList.contains('modal-basket-wrapper') || target.classList.contains('basket-header__close')
-        || target.value == 'Перейти к выбору'){
+        || target.classList.contains('go-to-selection') && !this.formError) {
         document.querySelector('.basket-wrapper').classList.add('fadeInRight')
         setTimeout(()=>{
           this.$store.commit('BASKET_DISPLAY', false) // закрываем модалку с корзиной
-        }, 900)
+          this.formError = false
+          this.$store.commit('APPLICATIN_SENT', false)
+        }, 1050)
       }
     },
     basketItemDel (event) {
@@ -128,7 +123,8 @@ export default {
       this.$store.commit('BASKET_ITEM_COUNT') // подсчет числа элементов в корзине
     },
     onsubmit () {
-      if (this.$refs.form && this.adres && this.name && this.phone) {
+      if (this.$refs['form'] && this.adres && this.name && this.phone.length === 16) {
+        this.formError = false
         const user = {
           name: this.name,
           adres: this.adres,
@@ -138,33 +134,22 @@ export default {
         this.$store.dispatch('formDispatch', user)
           .then(() => {
             try {
-              this.$store.commit('APPLICCATIN_SENT', true)
-              setTimeout(()=> {
-                this.$store.commit('APPLICCATIN_SENT', false)
-                this.$store.commit('BASKET_DISPLAY', false)
-              }, 5000)
+              this.$store.commit('APPLICATIN_SENT', true)
+              // this.$store.commit('BASKET_ITEM_COUNT')
+
+              // setTimeout(()=> {
+              //   this.$store.commit('APPLICATIN_SENT', false)
+                this.$store.commit('BASKET_DISPLAY', true)
+              // }, 5000)
             } catch (e) {
               alert('Что - то пошло не так...')
               throw e
             }
           })
           .catch(() => {})
+      } else {
+        this.formError = true
       }
-    }
-  },
-  directives: {
-    phone: {
-      bind(el) {
-        el.oninput = function(e) {
-          if (!e.isTrusted) {
-            return;
-          }
-
-          const x = this.value.replace(/\D/g, '').match(/(\d{0,3})(\d{0,3})(\d{0,2})(\d{0,2})/);
-          this.value = !x[2] ? x[1] : '' + x[1] + ' ' + x[2] + '-' + x[3] + '-' + (x[4] ? + x[4] : '');
-          el.dispatchEvent(new Event('input'));
-        }
-      },
     }
   }
 }
@@ -173,8 +158,8 @@ export default {
 <style scoped lang="scss">
 .fadeInRight{
   right: -470px !important;
-  opacity: 0.6;
-  transition: 0.9s all ease-in;
+  opacity: 0;
+  transition: 0.95s ease-in;
 }
 
 .modal-basket-wrapper {
@@ -217,6 +202,7 @@ export default {
   border: none;
   outline: none;
 
+  width: 100%;
   font-size: 15px;
   line-height: 21px;
 }
@@ -437,6 +423,9 @@ export default {
     font-size: 16px;
     line-height: 1.2;
   }
+}
 
+.error-form{
+  color: deeppink;
 }
 </style>

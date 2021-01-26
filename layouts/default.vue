@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div @click="clickSort($event)">
     <app-header></app-header>
     <main class="main">
 
@@ -9,25 +9,26 @@
 
         <div class="sort">
           Сортировать по:
-          <select @change="clickSort()" v-model="sortItemModel">
-            <option v-for="sort of sortItem">{{sort.name}}</option>
-          </select>
+          <span class="sort__result">{{sortItemModel}}</span>
+          <div class="select__wrapper" ref="selectWrapper">
+            <div v-for="sort of sortItem" class="select__item">{{sort.value}}</div>
+          </div>
         </div>
       </div>
       <!--   catalog   -->
 
       <div class="content-wrapper">
         <ul>
-          <li v-for="page of pages" :key="page.id">
-            <nuxt-link @click.prevent="goTo(page.id)" :to="`/${page.id}`" class="active catalog-item">{{page.name}}</nuxt-link>
+          <li v-for="page of pages" :key="page.id" @click="goTo(page.id)">
+            <nuxt-link :to="`/${page.id !== 1 ? page.id : '' }`" exact class="active catalog-item">{{page.name}}</nuxt-link>
           </li>
         </ul>
 
-        <Nuxt />
+        <Nuxt keep-alive />
       </div>
     </main>
     <app-basket />
-  </div>.products--wrapper
+  </div>
 </template>
 
 <script>
@@ -43,8 +44,8 @@ export default {
     return {
       pages: [],
       oldPage: null,
-      sortItem: [{ name: 'цене', sort: 'price'}, { name: 'рейтингу', sort: 'rating'}],
-      sortItemModel: 'цене',
+      sortItem: [{ name: 'цене', sort: 'price', value: 'по ценам'}, { name: 'рейтингу', sort: 'rating', value: 'по рейтингу'}],
+      sortItemModel: 'цене'
     }
   },
   computed: {
@@ -58,18 +59,33 @@ export default {
       if (this.oldPage !== page) {
         this.oldPage = page;
 
-        this.$router.push('/' + page)
+        if (page !== 1) {
+          this.$router.push('/' + page)
+        } else {
+          this.$router.push('/')
+        }
         this.$store.commit('SET_PAYLOAD_ID', page)
         this.$store.dispatch('renderCard')
       }
     },
-    clickSort () {
-      this.sortItem.forEach(item => {
-        if (item.name === this.sortItemModel) {
-          this.$store.commit('SET_PAYLOAD_SORT', item.sort)
-          this.$store.dispatch('renderCard')
-        }
-      })
+    clickSort (e) {
+      const target = e.target
+      if (target.classList.contains('sort__result')) {
+        this.$refs.selectWrapper.style.display = 'block';
+      } else if (target.classList.contains('select__item')) {
+
+        this.sortItem.forEach(item => {
+          if (item.value === target.textContent) {
+            this.sortItemModel = item.name
+            this.$store.commit('SET_PAYLOAD_SORT', item.sort)
+            this.$store.commit('SORT_MOUNTAINS', null)
+          }
+        })
+        this.$refs.selectWrapper.style.display = 'none';
+      }
+      else if (target) {
+        this.$refs.selectWrapper.style.display = 'none';
+      }
     }
   },
   created () {
@@ -107,6 +123,59 @@ export default {
     line-height: 1.5;
     color: #1F1F1F;
   }
+}
+
+.sort{
+  position: relative;
+}
+
+.select__wrapper{
+  position: absolute;
+  right: 0;
+  z-index: 2;
+  display: none;
+
+  margin-top: 6px;
+  padding: 8px 0;
+  background: #FFFFFF;
+  box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
+  min-width: 160px;
+}
+
+.select__item{
+  padding: 4px 12px;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 14px;
+  line-height: 18px;
+  cursor: pointer;
+  color: #959DAD;
+
+  &:hover{
+    color: #1F1F1F;
+    background: #F8F8F8;
+  }
+}
+
+.sort__result{
+  font-style: normal;
+  font-weight: normal;
+  font-size: 16px;
+  line-height: 21px;
+  color: #59606D;
+  cursor: pointer;
+}
+
+.sort__option{
+  background: #F8F8F8;
+  padding: 1px;
+}
+
+.sort__select{
+  position: absolute;
+  z-index: 1;
+  right: 0;
 }
 
 .catalog{

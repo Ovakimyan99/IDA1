@@ -21,27 +21,18 @@ export default {
   validate({params}) {
     return /^\d+$/.test(params.id)
   },
-  computed: {
-    mountains () {
-      const id = !!this.$route.path.split('/')[1] === false ? 1 : this.$route.path.split('/')[1];
-      this.$store.commit('SET_PAYLOAD_ID', id)
-      return this.$store.dispatch('renderCard')
-    },
-  },
   methods: {
     basketPushItem(event) {
       this.$store.dispatch('basketPushItem', event)
     }
   },
   created () {
-    this.$store.state.mountains.length = 0;
-    this.mountains
+    const id = !!this.$route.path.split('/')[1] === false ? 1 : this.$route.path.split('/')[1];
+    this.$store.commit('SET_PAYLOAD_ID', id)
   },
-  updated () {
-    this.$store.state.mountains.length = 0;
-    this.mountains;
-  },
-
+  async fetch() {
+    await this.$store.dispatch('renderCard')
+  }
 }
 </script>
 
