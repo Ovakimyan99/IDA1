@@ -135,12 +135,7 @@ export default {
           .then(() => {
             try {
               this.$store.commit('APPLICATIN_SENT', true)
-              // this.$store.commit('BASKET_ITEM_COUNT')
-
-              // setTimeout(()=> {
-              //   this.$store.commit('APPLICATIN_SENT', false)
-                this.$store.commit('BASKET_DISPLAY', true)
-              // }, 5000)
+              this.$store.commit('BASKET_DISPLAY', true)
             } catch (e) {
               alert('Что - то пошло не так...')
               throw e

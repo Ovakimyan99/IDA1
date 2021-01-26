@@ -6,7 +6,6 @@ export default {
       id: 1,
       sort: 'price'
     },
-
     //CATEGORY
     pageData: [],
 
