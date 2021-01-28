@@ -384,6 +384,9 @@ export default {
 
   border: none;
   outline: none;
+  transition: 0.3s ease-in;
+
+
 
   &.basket-input-submit{
     align-items: center;
@@ -391,6 +394,10 @@ export default {
     border-radius: 8px;
     color: white;
     cursor: pointer;
+
+    &:hover{
+      background: #59606D !important;
+    }
   }
 }
 
