@@ -36,4 +36,10 @@ export default {
   }
 }
 
+.container-products{
+  @media (max-width: 720px) {
+    margin-top: 20px;
+  }
+}
+
 </style>

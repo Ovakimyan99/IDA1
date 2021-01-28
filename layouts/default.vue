@@ -98,6 +98,7 @@ export default {
 .content-wrapper{
   display: flex;
   flex-direction: row;
+  margin-top: 24px;
 
   @media (max-width: 720px) {
     flex-direction: column;
@@ -113,6 +114,12 @@ export default {
 
     li {
       list-style-type: none;
+      margin-bottom: 16px;
+      line-height: 1;
+    }
+
+    li:last-child{
+      margin-bottom: 0;
     }
   }
 
@@ -120,13 +127,19 @@ export default {
     text-decoration: none;
     font-weight: normal;
     font-size: 16px;
-    line-height: 1.5;
-    color: #1F1F1F;
+    line-height: 1;
+    color: #959DAD;
+
+    &:hover{
+      color: #59606D;
+    }
   }
 }
 
 .sort{
   position: relative;
+  margin-right: 13px;
+  margin-top: 6px;
 }
 
 .select__wrapper{
@@ -165,6 +178,15 @@ export default {
   line-height: 21px;
   color: #59606D;
   cursor: pointer;
+
+  &:after{
+    content: '';
+    position: absolute;
+    border: 4px solid transparent;
+    border-top: 4px solid #59606D;
+    top: 50%;
+    margin-left: 5px;
+  }
 }
 
 .sort__option{
@@ -182,6 +204,10 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
+
+  h1 {
+    margin: 0;
+  }
 }
 
 .main{

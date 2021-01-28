@@ -167,6 +167,10 @@
   border-radius: 8px;
   padding: 14px;
 
+  font-family: PT Sans;
+  font-style: normal;
+  font-weight: normal;
+
   font-size: 16px;
   line-height: 21px;
   margin-bottom: 16px;
@@ -174,35 +178,6 @@
 
   border: none;
   outline: none;
-}
-
-.basket-placed-order{
-  display: flex;
-  display: none;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  margin-top: 100%;
-  transform: translateY(-100%);
-
-  & img {
-    width: 80px;
-    margin-bottom: 24px;
-  }
-
-  .basket-header{
-    font-size: 24px;
-    line-height: 1.15;
-    margin-bottom: 0;
-  }
-
-  .basket-filling__header{
-    margin-top: 2px;
-    font-size: 16px;
-    line-height: 1.2;
-  }
-
 }
 
 

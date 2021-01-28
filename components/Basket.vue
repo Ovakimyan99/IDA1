@@ -22,8 +22,6 @@
             <span class="products__item-descr">{{ name }}</span>
             <div class="products__item-price">{{ price }} ₽</div>
             <span class="products__item-star products__item-star">{{ rating }}</span>
-
-            <span class="counter">Кол-во: {{ counter }}</span>
           </div>
 
           <img class="basket-filling__item-del" src="@/theme/img/trash.svg" @click="basketItemDel($event)">
@@ -34,25 +32,25 @@
       <div class="basket-filling__header">Оформить заказ</div>
 
       <form ref="form">
-        <span class="empty-cart">Пока что вы ничего не добавили в корзину.</span>
         <div class="group">
           <input
             type="text"
             class="basket-input-form"
             placeholder="Ваше Имя"
             name="Name"
+            id="name"
+            ref="name"
             label="Name"
             v-model="name"
           >
-          <div class="basket-input-form">
+          <div class="basket-input-form" id="phone" ref="phone">
             <input
               type="tel"
               v-model="phone"
               name="phone"
-              id="phone"
               placeholder="Телефон"
               autocomplete="tel"
-              minlength="15"
+              maxlength="16"
               class="form-control"
               v-phone
               required
@@ -62,13 +60,17 @@
             type="text"
             class="basket-input-form"
             placeholder="Адрес"
+            id="adres"
+            ref="adres"
             v-model="adres"
           >
         </div>
 
         <input type="submit" value="Отправить" class="basket-input-form basket-input-submit" @click.prevent="onsubmit($event)">
       </form>
-      <span class="error-form" v-if="formError">Заполните форму корректно!</span>
+      <ul>
+        <li v-for="error in errors" style="color: hotpink">{{error}}</li>
+      </ul>
     </div>
 
     <div class="basket-wrapper" v-if="!this.$store.state.basketFormGroup">
@@ -84,7 +86,7 @@
         </form>
       </div>
 
-      <div v-if="this.$store.state.applicationSent">
+      <div class="basket-placed-order-wrapper" v-if="this.$store.state.applicationSent">
         <div class="basket-placed-order">
           <img src="@/theme/img/ok-hand.png" alt="ok">
           <span>Заявка успешно отправлена</span>
@@ -99,21 +101,21 @@
 export default {
   data () {
     return {
+      errors: [],
       phone: '',
       name: '',
       adres: '',
-      formError: false
     }
   },
   methods: {
     basketModal (event) {
       const target = event.target;
       if (target.classList.contains('modal-basket-wrapper') || target.classList.contains('basket-header__close')
-        || target.classList.contains('go-to-selection') && !this.formError) {
+        || target.classList.contains('go-to-selection')) {
         document.querySelector('.basket-wrapper').classList.add('fadeInRight')
         setTimeout(()=>{
           this.$store.commit('BASKET_DISPLAY', false) // закрываем модалку с корзиной
-          this.formError = false
+          this.errors.length = 0;
           this.$store.commit('APPLICATIN_SENT', false)
         }, 1050)
       }
@@ -124,7 +126,6 @@ export default {
     },
     onsubmit () {
       if (this.$refs['form'] && this.adres && this.name && this.phone.length === 16) {
-        this.formError = false
         const user = {
           name: this.name,
           adres: this.adres,
@@ -143,7 +144,27 @@ export default {
           })
           .catch(() => {})
       } else {
-        this.formError = true
+
+        for (const key in this.$refs) {
+            this.$refs[key].classList.remove('error-form')
+        }
+        const errorSelect = (selector) => {
+          this.$refs[selector].classList.add('error-form')
+        }
+
+        this.errors = [];
+        if (!this.adres) {
+          errorSelect('adres')
+          this.errors.push('Требуется указать адрес.')
+        }
+        if (this.phone.length !== 16) {
+          errorSelect('phone')
+          this.errors.push('Введте номер полностью.')
+        }
+        if (!this.name) {
+          errorSelect('name')
+          this.errors.push('Введте имя.')
+        }
       }
     }
   }
@@ -196,6 +217,10 @@ export default {
   background: #F8F8F8;
   border: none;
   outline: none;
+
+  font-family: PT Sans;
+  font-style: normal;
+  font-weight: normal;
 
   width: 100%;
   font-size: 15px;
@@ -301,11 +326,6 @@ export default {
   }
 }
 
-.counter {
-  margin-left: 60px;
-  font-size: 12px;
-}
-
 .basket-filling__item-descr{
   margin: 0 22px 0 35px;
   font-style: normal;
@@ -374,14 +394,17 @@ export default {
   }
 }
 
+.basket-placed-order-wrapper {
+  overflow: hidden;
+  margin-top: 100%;
+  transform: translateY(-115%);
+}
 .basket-placed-order{
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   text-align: center;
-  margin-top: 100%;
-  transform: translateY(-100%);
   z-index: 20;
 
   span {
@@ -400,6 +423,7 @@ export default {
     line-height: 21px;
     text-align: center;
     color: #59606D;
+    margin: 0;
   }
 
   & img {
@@ -421,6 +445,6 @@ export default {
 }
 
 .error-form{
-  color: deeppink;
+box-shadow: 0px 0px 0px 3px pink;
 }
 </style>

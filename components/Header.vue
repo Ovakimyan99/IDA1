@@ -23,11 +23,15 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 18px 15px;
 
-  padding: 18px 108px 18px 88px;
   box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.05);
   border-radius: 0px 0px 8px 8px;
   background-color: #fff;
+
+  @media (min-width: 855px) {
+    padding: 18px 108px 18px 88px;
+  }
 }
 
 .header__logo{

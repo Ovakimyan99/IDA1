@@ -88,14 +88,8 @@ export default {
     },
     BASKET_ITEM_DEL (state, target) { // удаляем товары из корзины
       let cardItem = target.closest('.basket-filling__item').id; // id карточки, взятая из DOM
-
       const product = state.basketData.find(item => item.id === +cardItem);
-
-      if (product['counter'] > 1) {
-        product['counter'] -= 1;
-      } else {
-        state.basketData.splice(state.basketData.indexOf(product), 1);
-      }
+      state.basketData.splice(state.basketData.indexOf(product), 1);
     },
     BASKET_ITEM_COUNT (state) {
       // число отображающее количество элементов в корзине
@@ -136,7 +130,7 @@ export default {
       commit('SET_CATEGORY', category)
     },
     async basketPushItem (state, payload) {
-      const target = payload.target
+      const target = payload
       if (target && target.classList.contains('products__item-basket')) {
         const id = +target.closest('.products__item').id
         const res = await fetch('https://frontend-test.idaproject.com/api/product')
